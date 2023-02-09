@@ -1,0 +1,86 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_NAME_LENGTH 50
+#define MAX_DEPT_LENGTH 20
+
+typedef struct Employee {
+    int id;
+    char name[MAX_NAME_LENGTH];
+    char department[MAX_DEPT_LENGTH];
+    float salary;
+} Employee;
+
+void printEmployee(Employee emp) {
+    printf("ID: %d\n", emp.id);
+    printf("Name: %s\n", emp.name);
+    printf("Department: %s\n", emp.department);
+    printf("Salary: %.2f\n", emp.salary);
+}
+
+void addEmployee(FILE *fp) {
+    Employee emp;
+
+    printf("Enter the employee ID: ");
+    scanf("%d", &emp.id);
+
+    printf("Enter the employee name: ");
+    scanf("%s", emp.name);
+
+    printf("Enter the employee department: ");
+    scanf("%s", emp.department);
+
+    printf("Enter the employee salary: ");
+    scanf("%f", &emp.salary);
+
+    fseek(fp, (emp.id - 1) * sizeof(Employee), SEEK_SET);
+    fwrite(&emp, sizeof(Employee), 1, fp);
+}
+
+void updateEmployee(FILE *fp) {
+    int id;
+    Employee emp;
+
+    printf("Enter the employee ID: ");
+    scanf("%d", &id);
+
+    fseek(fp, (id - 1) * sizeof(Employee), SEEK_SET);
+    fread(&emp, sizeof(Employee), 1, fp);
+
+    printf("Employee details:\n");
+    printEmployee(emp);
+
+    printf("Enter the updated employee name: ");
+    scanf("%s", emp.name);
+
+    printf("Enter the updated employee department: ");
+    scanf("%s", emp.department);
+
+    printf("Enter the updated employee salary: ");
+    scanf("%f", &emp.salary);
+
+    fseek(fp, (id - 1) * sizeof(Employee), SEEK_SET);
+    fwrite(&emp, sizeof(Employee), 1, fp);
+}
+
+void deleteEmployee(FILE *fp) {
+    int id;
+    Employee emp;
+
+    printf("Enter the employee ID: ");
+    scanf("%d", &id);
+
+    fseek(fp, (id - 1) * sizeof(Employee), SEEK_SET);
+    fread(&emp, sizeof(Employee), 1, fp);
+
+    printf("Employee details:\n");
+    printEmployee(emp);
+
+    strcpy(emp.name, "");
+    strcpy(emp.department, "");
+    emp.salary = 0.0;
+
+    fseek(fp, (id - 1) * sizeof(Employee), SEEK_SET);
+    fwrite(&emp, sizeof(Employee), 1, fp);
+}
