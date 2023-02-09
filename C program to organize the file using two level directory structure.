@@ -1,0 +1,46 @@
+#include <stdio.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <string.h>
+
+#define MAX_LEN 256
+
+void create_directory(const char *path) {
+  if (mkdir(path, 0700) == -1) {
+    perror("Error creating directory");
+  }
+}
+
+void organize_files(const char *src_dir, const char *dest_dir) {
+  DIR *dir = opendir(src_dir);
+  struct dirent *entry;
+  char src_path[MAX_LEN];
+  char dest_path[MAX_LEN];
+
+  if (!dir) {
+    perror("Error opening source directory");
+    return;
+  }
+
+  while ((entry = readdir(dir)) != NULL) {
+    if (entry->d_type == DT_REG) {
+      snprintf(src_path, MAX_LEN, "%s/%s", src_dir, entry->d_name);
+      snprintf(dest_path, MAX_LEN, "%s/%c", dest_dir, entry->d_name[0]);
+      create_directory(dest_path);
+      snprintf(dest_path, MAX_LEN, "%s/%c/%s", dest_dir, entry->d_name[0], entry->d_name);
+      if (rename(src_path, dest_path) == -1) {
+        perror("Error moving file");
+      }
+    }
+  }
+  closedir(dir);
+}
+
+int main(int argc, char *argv[]) {
+  if (argc != 3) {
+    printf("Usage: %s <src_dir> <dest_dir>\n", argv[0]);
+    return 1;
+  }
+  organize_files(argv[1], argv[2]);
+  return 0;
+}
